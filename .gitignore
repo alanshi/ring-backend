@@ -1,3 +1,6 @@
 /target
 
 poem.txt
+*.db
+*.zip
+*.csv

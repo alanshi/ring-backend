@@ -892,6 +892,7 @@ version = "0.1.0"
 dependencies = [
  "actix-web",
  "rand 0.7.3",
+ "regex",
 ]
 
 [[package]]

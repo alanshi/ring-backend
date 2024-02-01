@@ -3,8 +3,13 @@ use std::{
     io::{prelude::*, BufReader},
     path::Path,
 };
+
 use rand::seq::SliceRandom;
-use actix_web::{get, web, App, HttpServer, Responder};
+use actix_web::{get, App, HttpServer, Responder};
+
+use std::sync::Mutex;
+
+static GLOBAL_DATA: Mutex<Vec<String>> = Mutex::new(Vec::new());
 
 
 fn lines_from_file(filename: impl AsRef<Path>) -> Vec<String> {
@@ -16,11 +21,9 @@ fn lines_from_file(filename: impl AsRef<Path>) -> Vec<String> {
 }
 
 fn get_ran_line() -> String {
-    let file_path = "/home/www/ring/poem.txt";
-    let lines = lines_from_file(file_path);
     let mut rng = rand::thread_rng();
-    let ran_line = lines.choose(&mut rng).unwrap();
-    return ran_line.to_lowercase();
+    let ran_line = GLOBAL_DATA.lock().unwrap().choose(&mut rng).unwrap().to_string();
+    return ran_line;
 }
 
 #[get("/get-poem/")]
@@ -31,6 +34,8 @@ async fn get_poem() -> impl Responder {
 
 #[actix_web::main] // or #[tokio::main]
 async fn main() -> std::io::Result<()> {
+    let file_path = "/home/www/ring/poem.txt";
+    *GLOBAL_DATA.lock().unwrap() = lines_from_file(file_path);
     HttpServer::new(|| {
         App::new().service(get_poem)
     })
